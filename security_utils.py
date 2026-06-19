@@ -7,10 +7,14 @@ import html
 from typing import Dict, Any, Tuple
 
 # Retrieve the signature key dynamically from environment configuration
-SECRET_KEY = os.getenv(
-    "ECOSPHERE_SECRET",
-    "ecosphere_secret_secure_key_2026_promptwars"
-).encode("utf-8")
+_raw_secret = os.getenv("ECOSPHERE_SECRET")
+if not _raw_secret:
+    raise RuntimeError(
+        "ECOSPHERE_SECRET environment variable is not set. "
+        "Generate one with: "
+        'python3 -c "import secrets; print(secrets.token_hex(32))"'
+    )
+SECRET_KEY: bytes = _raw_secret.encode("utf-8")
 
 def sanitize_string(text: str) -> str:
     """Escapes HTML special characters to prevent cross-site scripting (XSS).

@@ -575,12 +575,16 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
         const logoIcon = document.querySelector(".logo-icon");
+        const greensecBanner = document.getElementById("greensecObjectiveBanner");
         if (state.activeMode === "personal") {
             body.className = "theme-personal";
             personalForm.classList.remove("hidden");
             greensecForm.classList.add("hidden");
             personalNudgeBox.classList.remove("hidden");
             greensecNudgeBox.classList.add("hidden");
+            if (greensecBanner) {
+                greensecBanner.classList.add("hidden");
+            }
             if (logoIcon) {
                 logoIcon.setAttribute("class", "logo-icon green-glow");
             }
@@ -593,6 +597,9 @@ document.addEventListener("DOMContentLoaded", () => {
         greensecForm.classList.remove("hidden");
         personalNudgeBox.classList.add("hidden");
         greensecNudgeBox.classList.remove("hidden");
+        if (greensecBanner) {
+            greensecBanner.classList.remove("hidden");
+        }
         if (logoIcon) {
             logoIcon.setAttribute("class", "logo-icon cyan-glow");
         }

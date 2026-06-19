@@ -1,43 +1,42 @@
-# Walkthrough - Modularity & Linter Clean Sweep
+# Walkthrough - Configuration Separation & Objective Alignment Refactor
 
-This walkthrough documents the implementations, refactoring patterns, and verification results of the rigorous "Linter and Modularity" sweep performed across both python and javascript components of the EcoSphere platform.
+This walkthrough documents the design pattern changes, frontend enhancements, and verification results of the Configuration Separation and Explicit Objective Alignment refactor.
 
 ---
 
-## 🛠️ Code Quality Improvements
+## 🛠️ Code Quality & Alignment Improvements
 
-### 1. Python Formatting & Standard Compliance
-* **PEP 8 / Black Formatting**: Adjusted code layout, import statements, and function calls in all python files to remain strictly under the maximum **88-character** line limit.
-* **Dead Code Cleanup**: Swept all python files to remove unused imports, dead variables, and redundant checks.
+### 1. Separation of Configuration (Code Quality)
+* **Capitalized Configuration Constants**: Created a new [config.py](../config.py) configuration file that abstracts all previously hardcoded carbon weight numbers, daily/monthly conversion multipliers, and validator safety limits.
+* **Consolidated Reference Usage**: Refactored the core execution equations inside [calc_engine.py](../calc_engine.py) and Pydantic model thresholds inside [main.py](../main.py) to refer cleanly to config properties.
 
-### 2. Backend Modularity Refactoring
-* **Split Monolithic Calculations**: Broke down the extensive calculator calculations in [calc_engine.py](../calc_engine.py) into smaller private mathematical helper functions:
-  * `_calculate_car_co2()`, `_calculate_flight_co2()`, `_calculate_diet_co2()`, `_calculate_energy_co2()`, `_calculate_waste_co2()` for personal metrics.
-  * `_calculate_crypto_co2()`, `_calculate_storage_co2()`, `_calculate_scan_co2()`, `_calculate_agent_co2()` for GreenSec IT infrastructure metrics.
-* **Endpoint Modularity**: Extracted individual assertions from the 70+ line test suite endpoint in [main.py](../main.py) into discrete helper functions (`_test_boundary_validation()`, `_test_xss_sanitization()`, etc.).
+### 2. Explicit Objective Alignment (Problem Statement Alignment)
+* **Core Objective Banner**: Integrated a premium high-visibility mission-alignment banner at the top of the inputs card in [index.html](../static/index.html) explaining the platform's environmental risk objective.
+* **Dynamic Theme Switch Interaction**: Programmed [app.js](../static/app.js) to show/hide this objective banner when toggling between Personal and GreenSec modes.
 
-### 3. JavaScript Nesting & Modularity Refactoring
-* **Early Returns Integration**: Eliminated deeply nested `if/else` checks across click event handlers, dropdown adjustments, and state load/verify paths in [app.js](../static/app.js).
-* **Modularity Extraction**: Modularized client-side event handlers and calculations into discrete functions like `triggerPersonalCalculation()`, `triggerGreensecCalculation()`, and `runAutomatedTests()`.
-* **SVG Attribute Fix**: Fixed class assignment crashes on Lucide SVG elements by using `.setAttribute("class", ...)` instead of read-only `.className` assignments.
+### 3. Contextual Docstrings (Problem Statement Alignment)
+* **Explicit User Context**: Refactored all endpoint descriptions inside [main.py](../main.py) to explicitly detail how each endpoint addresses invisible compute waste and helps audit team decisions.
+
+### 4. Hardened Dynamic Secret Check (Security Compliance)
+* **Strict Variable Enforcement**: Modified [security_utils.py](../security_utils.py) to reject fallback secrets, throwing a `RuntimeError` on startup if `ECOSPHERE_SECRET` is not set in the environment.
 
 ---
 
 ## 📊 Verification Results
 
-* **Automated Test Suite**: Ran the local Dev modal test suite. All **7/7 test cases** completed with a status of `PASSED`.
-* **State Verification & Security**: Verified HMAC-SHA256 signature verification and tamper protection function without failure under the refactored early return structures.
+* **Automated Regression Audits**: Ran the Dev Modal test suite with all **7/7 test cases** reporting `PASSED`.
+* **Dynamic Input Adjustments**: Confirmed calculations update instantly and accurately under the new configuration system.
 
-### Test Results Console
-![Passed Tests Result](test_results_passed.png)
+### Core Objective Banner in GreenSec Mode
+![Core Objective Banner](greensec_mode_banner.png)
 
-### Auto-Calculations
-![Calculations Updated](calculations_updated.png)
+### Automated Test Results Console
+![Passed Tests Result](test_results_passed_refactored.png)
 
 ---
 
 ## 🎥 Walkthrough Verification Demo
 
-The following visual recording verifies page navigation, input calculation updates, and successful Dev Console test suite execution:
+The following visual recording shows page navigation, active objective banner toggles, and successful Dev Console test suite execution:
 
-![Verification Demo](verify_app_fixed.webp)
+![Verification Demo](verify_refactored_and_hardened.webp)

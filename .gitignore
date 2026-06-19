@@ -1,0 +1,22 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# IDE/Editor settings
+.vscode/
+.idea/
+
+# Local configuration/secrets
+.env
+
+# OS-specific
+Thumbs.db
+ehthumbs.db
+Desktop.ini

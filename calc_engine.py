@@ -1,75 +1,32 @@
 import logging
 from typing import Dict, Any
 from functools import lru_cache
+import config
 
 logger = logging.getLogger(__name__)
 
 
-# Traditional/Everyday Carbon Emission Factors (kg CO2 per unit)
-EMISSION_FACTORS_PERSONAL = {
-    "car_per_km": 0.18,        # Driving typical gasoline car
-    "flight_per_hour": 90.0,    # Flying commercial passenger jet (~90 kg CO2 per hour passenger share)
-    "electricity_per_kwh": 0.82,# Grid electricity average
-    "waste_per_kg": 0.5,        # Waste disposed in landfill
-    "diet_daily": {
-        "beef_heavy": 7.2,
-        "high_meat": 3.3,
-        "poultry_fish": 3.8,
-        "low_meat": 2.5,
-        "vegetarian": 1.7,
-        "plant_based_meat": 1.9,
-        "vegan": 1.5,
-        "locally_sourced_veg": 1.3
-    }
-}
-
-# GreenSec IT Carbon Emission Factors (kWh per unit)
-# Powered by average grid factor of 0.82 kg CO2 / kWh
-GRID_CO2_FACTOR = 0.82
-
-EMISSION_FACTORS_GREENSEC = {
-    # Cryptographic Operations (kWh per 1 Million Operations)
-    "crypto_kwh_per_million": {
-        "rsa4096": 0.08,        # Energy heavy
-        "rsa2048": 0.02,
-        "ecc256": 0.005,        # Energy light
-    },
-    # SIEM Logging Storage (kg CO2 per GB per month)
-    "siem_storage_co2_per_gb_month": {
-        "hot_storage": 0.015,   # High-availability hot storage (SSD, replication)
-        "cold_archive": 0.002,  # Compressed, tiered cold archive
-    },
-    # Vulnerability Security Scans (kWh per scan)
-    "scan_kwh_per_run": {
-        "full_dast": 0.50,      # Dynamic Application Security Scan (Long running, continuous environment traffic)
-        "targeted_sast": 0.02,  # Static Application Security Scan (Incremental, quick analysis)
-    },
-    # Dedicated VM Host Security Agents (kWh per hour)
-    "agent_kwh_per_hour": {
-        "heavy_agent": 0.05,    # Multi-agent active scanning agent
-        "light_kernel": 0.008   # EBPF kernel-level passive sensor
-    }
-}
-
 def _calculate_car_co2(car_km: float) -> float:
-    return car_km * EMISSION_FACTORS_PERSONAL["car_per_km"]
+    return car_km * config.CAR_EMISSION_FACTOR
 
 
 def _calculate_flight_co2(flight_hours: float) -> float:
-    return flight_hours * EMISSION_FACTORS_PERSONAL["flight_per_hour"]
+    return flight_hours * config.FLIGHT_EMISSION_FACTOR
 
 
 def _calculate_diet_co2(diet_type: str) -> float:
-    factor = EMISSION_FACTORS_PERSONAL["diet_daily"].get(diet_type, 2.5)
-    return factor * 365.25
+    factor = config.DIET_DAILY_FACTORS.get(
+        diet_type, config.DEFAULT_DIET_FACTOR
+    )
+    return factor * config.YEARLY_DAYS
 
 
 def _calculate_electricity_co2(kwh: float) -> float:
-    return kwh * EMISSION_FACTORS_PERSONAL["electricity_per_kwh"]
+    return kwh * config.ELECTRICITY_EMISSION_FACTOR
 
 
 def _calculate_waste_co2(kg: float) -> float:
-    return kg * EMISSION_FACTORS_PERSONAL["waste_per_kg"]
+    return kg * config.WASTE_EMISSION_FACTOR
 
 
 @lru_cache(maxsize=128)
@@ -112,29 +69,27 @@ def calculate_personal_footprint(
 
 
 def _calculate_crypto_co2(ops_millions: float, crypto_type: str) -> float:
-    factor = EMISSION_FACTORS_GREENSEC["crypto_kwh_per_million"].get(
-        crypto_type, 0.08
+    factor = config.CRYPTO_KWH_PER_MILLION.get(
+        crypto_type, config.DEFAULT_CRYPTO_KWH
     )
-    return ops_millions * factor * 12 * GRID_CO2_FACTOR
+    return ops_millions * factor * config.YEARLY_MONTHS * config.GRID_CO2_FACTOR
 
 
 def _calculate_storage_co2(gb: float, storage_type: str) -> float:
-    factor = EMISSION_FACTORS_GREENSEC["siem_storage_co2_per_gb_month"].get(
-        storage_type, 0.015
+    factor = config.SIEM_STORAGE_CO2_PER_GB_MONTH.get(
+        storage_type, config.DEFAULT_STORAGE_CO2
     )
-    return gb * factor * 12
+    return gb * factor * config.YEARLY_MONTHS
 
 
 def _calculate_scan_co2(runs: float, scan_type: str) -> float:
-    factor = EMISSION_FACTORS_GREENSEC["scan_kwh_per_run"].get(scan_type, 0.5)
-    return runs * factor * 12 * GRID_CO2_FACTOR
+    factor = config.SCAN_KWH_PER_RUN.get(scan_type, config.DEFAULT_SCAN_KWH)
+    return runs * factor * config.YEARLY_MONTHS * config.GRID_CO2_FACTOR
 
 
 def _calculate_agent_co2(hours: float, agent_type: str) -> float:
-    factor = EMISSION_FACTORS_GREENSEC["agent_kwh_per_hour"].get(
-        agent_type, 0.05
-    )
-    return hours * factor * 12 * GRID_CO2_FACTOR
+    factor = config.AGENT_KWH_PER_HOUR.get(agent_type, config.DEFAULT_AGENT_KWH)
+    return hours * factor * config.YEARLY_MONTHS * config.GRID_CO2_FACTOR
 
 
 def _calculate_optimized_greensec_total(
@@ -142,26 +97,26 @@ def _calculate_optimized_greensec_total(
 ) -> float:
     opt_crypto = (
         ops
-        * EMISSION_FACTORS_GREENSEC["crypto_kwh_per_million"]["ecc256"]
-        * 12
-        * GRID_CO2_FACTOR
+        * config.CRYPTO_KWH_PER_MILLION["ecc256"]
+        * config.YEARLY_MONTHS
+        * config.GRID_CO2_FACTOR
     )
     opt_storage = (
         gb
-        * EMISSION_FACTORS_GREENSEC["siem_storage_co2_per_gb_month"]["cold_archive"]
-        * 12
+        * config.SIEM_STORAGE_CO2_PER_GB_MONTH["cold_archive"]
+        * config.YEARLY_MONTHS
     )
     opt_scan = (
         runs
-        * EMISSION_FACTORS_GREENSEC["scan_kwh_per_run"]["targeted_sast"]
-        * 12
-        * GRID_CO2_FACTOR
+        * config.SCAN_KWH_PER_RUN["targeted_sast"]
+        * config.YEARLY_MONTHS
+        * config.GRID_CO2_FACTOR
     )
     opt_agent = (
         hours
-        * EMISSION_FACTORS_GREENSEC["agent_kwh_per_hour"]["light_kernel"]
-        * 12
-        * GRID_CO2_FACTOR
+        * config.AGENT_KWH_PER_HOUR["light_kernel"]
+        * config.YEARLY_MONTHS
+        * config.GRID_CO2_FACTOR
     )
     return opt_crypto + opt_storage + opt_scan + opt_agent
 
@@ -219,10 +174,10 @@ def calculate_greensec_footprint(
 def get_relatable_equivalencies(co2_kg: float) -> Dict[str, Any]:
     """Translates raw CO2 kg into relatable physical metrics."""
     logger.info(f"get_relatable_equivalencies called: co2_kg={co2_kg}")
-    trees = co2_kg / 22.0
-    charges = co2_kg / 0.00656
-    flights = co2_kg / 90.0
-    household_months = co2_kg / 123.0
+    trees = co2_kg / config.TREES_OFFSET_DIVISOR
+    charges = co2_kg / config.SMARTPHONE_CHARGE_DIVISOR
+    flights = co2_kg / config.FLIGHT_EQUIVALENT_DIVISOR
+    household_months = co2_kg / config.HOUSEHOLD_MONTH_DIVISOR
 
     return {
         "trees_planted": round(trees, 1),
@@ -230,4 +185,3 @@ def get_relatable_equivalencies(co2_kg: float) -> Dict[str, Any]:
         "delhi_mumbai_flights": round(flights, 1),
         "household_electricity_months": round(household_months, 1),
     }
-

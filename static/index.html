@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdn.jsdelivr.net https://unpkg.com https://fonts.googleapis.com https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com;">
+    <title>EcoSphere: Carbon & GreenSec Risk Platform</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Chart.js and Lucide Icons with Subresource Integrity / Secure CDN loading -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" integrity="sha384-jb8JQMbMoBUzgWatfe6COACi2ljcDdZQ2OxczGA3bGNeWe+6DChMTBJemed7ZnvJ" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/lucide@0.344.0/dist/umd/lucide.min.js" integrity="sha384-tTkFttkBclaU1cloKwOi9xk3pbao3VZxTjLNBt8iFABWDBQibbAbWpVmO28zMuxq" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-personal">
+    <div class="app-container">
+        <!-- HEADER -->
+        <header class="app-header">
+            <div class="logo-area">
+                <i data-lucide="shield-alert" class="logo-icon green-glow" aria-hidden="true"></i>
+                <div class="logo-text">
+                    <h1>ECO<span class="highlight">SPHERE</span></h1>
+                    <span class="sub-logo">Carbon & GreenSec Risk Platform</span>
+                </div>
+            </div>
+            
+            <!-- Mode Toggle Switch -->
+            <div class="mode-toggle-container" role="region" aria-label="Theme Mode Selection">
+                <span class="toggle-label personal-active" id="personalModeLabel">🍃 Personal Mode</span>
+                <label class="switch" for="modeToggle">
+                    <input type="checkbox" id="modeToggle" role="switch" aria-checked="false" aria-label="Toggle between Personal and GreenSec modes" aria-labelledby="personalModeLabel greensecModeLabel">
+                    <span class="slider round"></span>
+                </label>
+                <span class="toggle-label greensec-active" id="greensecModeLabel">💻 GreenSec Mode</span>
+            </div>
+        </header>
+
+        <!-- MAIN LAYOUT -->
+        <main class="dashboard-grid">
+            
+            <!-- LEFT COLUMN: RISK CALCULATORS -->
+            <section class="card glass-card calc-section" role="region" aria-label="Carbon Risk Calculators">
+                <div class="card-header">
+                    <i data-lucide="sliders" class="header-icon" aria-hidden="true"></i>
+                    <h2>Risk Factors</h2>
+                </div>
+                
+                <!-- PERSONAL INPUTS FORM -->
+                <form id="personalForm" class="calc-form">
+                    <div class="input-group">
+                        <label for="carKm"><i data-lucide="car" aria-hidden="true"></i> Vehicle Travel (km/year)</label>
+                        <input type="number" id="carKm" value="8000" min="0" max="1000000" aria-describedby="carKmHint">
+                        <span class="input-hint" id="carKmHint">Driving a standard petrol/gasoline vehicle</span>
+                    </div>
+                    <div class="input-group">
+                        <label for="flightHours"><i data-lucide="plane" aria-hidden="true"></i> Commercial Flights (hours/year)</label>
+                        <input type="number" id="flightHours" value="12" min="0" max="1000" aria-describedby="flightHoursHint">
+                        <span class="input-hint" id="flightHoursHint">e.g., Delhi-Mumbai return flight is ~4 hours</span>
+                    </div>
+                    <div class="input-group">
+                        <label for="dietType"><i data-lucide="utensils" aria-hidden="true"></i> Diet Choice</label>
+                        <select id="dietType" aria-describedby="dietTypeHint">
+                            <option value="beef_heavy">Heavy Meat (Beef/Lamb)</option>
+                            <option value="high_meat">High-Meat (Daily meat)</option>
+                            <option value="poultry_fish">Moderate Meat (Poultry/Pork)</option>
+                            <option value="low_meat" selected>Low-Meat (Flexitarian)</option>
+                            <option value="vegetarian">Pescatarian / Vegetarian</option>
+                            <option value="plant_based_meat">Plant-based Alternatives</option>
+                            <option value="vegan">Traditional Vegan</option>
+                            <option value="locally_sourced_veg">Locally-sourced Organic Veg</option>
+                        </select>
+                        <span class="input-hint" id="dietTypeHint">Food selection has a heavy carbon footprint</span>
+                    </div>
+                    <div class="input-group">
+                        <label for="electricityKwh"><i data-lucide="zap" aria-hidden="true"></i> Electricity (kWh/year)</label>
+                        <input type="number" id="electricityKwh" value="2400" min="0" max="100000" aria-describedby="electricityKwhHint">
+                        <span class="input-hint" id="electricityKwhHint">Household power bill consumption</span>
+                    </div>
+                    <div class="input-group">
+                        <label for="wasteKg"><i data-lucide="trash-2" aria-hidden="true"></i> Household Waste (kg/year)</label>
+                        <input type="number" id="wasteKg" value="400" min="0" max="50000" aria-describedby="wasteKgHint">
+                        <span class="input-hint" id="wasteKgHint">Organic, plastic, and general garbage</span>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-glow" aria-label="Calculate Personal Carbon Footprint">Calculate Footprint</button>
+                </form>
+
+                <!-- GREENSEC CORE OBJECTIVE BANNER -->
+                <div id="greensecObjectiveBanner" class="objective-banner hidden" role="region" aria-label="Core Objective Info">
+                    <i data-lucide="info" class="banner-icon" aria-hidden="true"></i>
+                    <p class="banner-text">
+                        <strong>Enterprise Risk Objective:</strong> Quantify and mitigate the environmental exposure of your cryptographic and architectural decisions.
+                    </p>
+                </div>
+
+                <!-- GREENSEC INPUTS FORM -->
+                <form id="greensecForm" class="calc-form hidden">
+                    <div class="input-group">
+                        <label for="cryptoOps"><i data-lucide="key-round" aria-hidden="true"></i> Cryptographic Operations (M/month)</label>
+                        <input type="number" id="cryptoOps" value="5000" min="0" max="100000" aria-describedby="cryptoOpsHint">
+                        <span class="input-hint" id="cryptoOpsHint">Millions of handshakes, sign ops, or decryption logs</span>
+                    </div>
+                    <div class="input-group">
+                        <label for="cryptoType"><i data-lucide="cpu" aria-hidden="true"></i> Encryption Standard</label>
+                        <select id="cryptoType" aria-describedby="cryptoTypeHint">
+                            <option value="rsa4096" selected>RSA-4096 (High intensity CPU math)</option>
+                            <option value="rsa2048">RSA-2048 (Medium intensity)</option>
+                            <option value="ecc256">ECC-256 / Ed25519 (Ultra-light curve)</option>
+                        </select>
+                        <span class="input-hint" id="cryptoTypeHint">Different algorithms require vastly different compute power</span>
+                    </div>
+                    <div class="input-group">
+                        <label for="logSize"><i data-lucide="database" aria-hidden="true"></i> SIEM Logging (GB/month)</label>
+                        <input type="number" id="logSize" value="1200" min="0" max="1000000" aria-describedby="logSizeHint">
+                        <span class="input-hint" id="logSizeHint">Data ingested into log analytics, firewalls, and audit databases</span>
+                    </div>
+                    <div class="input-group">
+                        <label for="logStorage"><i data-lucide="hard-drive" aria-hidden="true"></i> SIEM Retention Policy</label>
+                        <select id="logStorage" aria-describedby="logStorageHint">
+                            <option value="hot_storage" selected>Hot Storage (Active SSD cluster, fully indexed)</option>
+                            <option value="cold_archive">Tiered Cold Archive (Compressed, offline Glacier storage)</option>
+                        </select>
+                        <span class="input-hint" id="logStorageHint">Storing uncompressed hot logs uses continuous storage VM energy</span>
+                    </div>
+                    <div class="input-group">
+                        <label for="scanRuns"><i data-lucide="shield-check" aria-hidden="true"></i> Security Pipelines (scans/month)</label>
+                        <input type="number" id="scanRuns" value="25" min="0" max="100000" aria-describedby="scanRunsHint">
+                        <span class="input-hint" id="scanRunsHint">Active vulnerability scans, CI/CD automated test cycles</span>
+                    </div>
+                    <div class="input-group">
+                        <label for="scanType"><i data-lucide="activity" aria-hidden="true"></i> Scan Implementation</label>
+                        <select id="scanType" aria-describedby="scanTypeHint">
+                            <option value="full_dast" selected>Full Continuous DAST (Simulated traffic, active server load)</option>
+                            <option value="targeted_sast">Targeted Incremental SAST (Static lightweight checks)</option>
+                        </select>
+                        <span class="input-hint" id="scanTypeHint">Dynamic or static application vulnerability scanning pipeline</span>
+                    </div>
+                    <div class="input-group">
+                        <label for="serverHours"><i data-lucide="server" aria-hidden="true"></i> Security VM Execution (hours/month)</label>
+                        <input type="number" id="serverHours" value="1488" min="0" max="744000" aria-describedby="serverHoursHint">
+                        <span class="input-hint" id="serverHoursHint">Time spent running heavy endpoint agents on cloud clusters</span>
+                    </div>
+                    <div class="input-group">
+                        <label for="agentType"><i data-lucide="fingerprint" aria-hidden="true"></i> Endpoint Detection Agent</label>
+                        <select id="agentType" aria-describedby="agentTypeHint">
+                            <option value="heavy_agent" selected>Heavy Active VM Agent (Continuous scanning)</option>
+                            <option value="light_kernel">Lightweight eBPF Probe (Kernel-level passive capture)</option>
+                        </select>
+                        <span class="input-hint" id="agentTypeHint">Type of threat detection agent running on VM hosts</span>
+                    </div>
+                    <button type="submit" class="btn btn-secondary btn-glow" aria-label="Audit IT Infrastructure Carbon Footprint">Audit IT Infrastructure</button>
+                </form>
+            </section>
+
+            <!-- MIDDLE COLUMN: THE LIVING ECOSPHERE CANVAS & COMPARISONS -->
+            <section class="middle-column">
+                
+                <!-- ECOSPHERE VISUAL VISUALIZATION -->
+                <section class="card glass-card canvas-card" role="region" aria-label="Living EcoSphere Simulator Visualizer">
+                    <div class="card-header">
+                        <i data-lucide="globe" class="header-icon" aria-hidden="true"></i>
+                        <h2>Living EcoSphere Simulator</h2>
+                    </div>
+                    <div class="canvas-wrapper">
+                        <canvas id="sphereCanvas" width="480" height="300" aria-label="Dynamic animation depicting visual ecosystem feedback of calculated carbon emissions."></canvas>
+                        <!-- Dynamic overlay for state indicators -->
+                        <div class="sphere-overlay" aria-live="polite">
+                            <div class="metric-badge" role="status" aria-live="polite">
+                                <span id="overlayTotal">0.0</span> <span class="unit">kg CO₂e / yr</span>
+                            </div>
+                            <div class="status-indicator" id="sphereStatus" role="status" aria-live="polite">Calculating Ecosystem Balance...</div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- STATS & EQUIVALENCIES -->
+                <section class="card glass-card stats-card" role="region" aria-label="Impact Equivalencies">
+                    <div class="card-header">
+                        <i data-lucide="repeat" class="header-icon" aria-hidden="true"></i>
+                        <h2>Impact Equivalency</h2>
+                    </div>
+                    <div class="stats-grid" aria-live="polite">
+                        <article class="stat-box" role="status" aria-label="Trees Offset Requirement">
+                            <div class="stat-icon"><i data-lucide="tree-pine" class="green-text" aria-hidden="true"></i></div>
+                            <div class="stat-value" id="treesVal">0.0</div>
+                            <div class="stat-desc">Trees Needed to Offset (per year)</div>
+                        </article>
+                        <article class="stat-box" role="status" aria-label="Smartphone Charges Equivalent">
+                            <div class="stat-icon"><i data-lucide="smartphone" class="blue-text" aria-hidden="true"></i></div>
+                            <div class="stat-value" id="chargesVal">0</div>
+                            <div class="stat-desc">Smartphone Charges Equivalent</div>
+                        </article>
+                        <article class="stat-box" role="status" aria-label="Delhi-Mumbai Flights Equivalent">
+                            <div class="stat-icon"><i data-lucide="plane-takeoff" class="coral-text" aria-hidden="true"></i></div>
+                            <div class="stat-value" id="flightsVal">0.0</div>
+                            <div class="stat-desc">Delhi-Mumbai Flights Equivalent</div>
+                        </article>
+                        <article class="stat-box" role="status" aria-label="Avg Household Electricity Months Equivalent">
+                            <div class="stat-icon"><i data-lucide="home" class="yellow-text" aria-hidden="true"></i></div>
+                            <div class="stat-value" id="electricityVal">0.0</div>
+                            <div class="stat-desc">Avg Household Electricity (months)</div>
+                        </article>
+                    </div>
+                </section>
+            </section>
+
+
+            <!-- RIGHT COLUMN: NUDGE SIMULATORS & LEADERBOARD -->
+            <aside class="right-column">
+                
+                <!-- NUDGE SIMULATORS -->
+                <section class="card glass-card nudge-card" role="region" aria-label="Real-time Decision Nudge Sandbox">
+                    <div class="card-header">
+                        <i data-lucide="alert-circle" class="header-icon" aria-hidden="true"></i>
+                        <h2>Real-time Decision Nudge</h2>
+                    </div>
+                    
+                    <!-- PERSONAL SIMULATOR (FOOD DELIVERY) -->
+                    <article id="personalNudgeBox" class="nudge-box">
+                        <p class="nudge-intro-text">Interactive Sandbox: Simulate making a lunch order on a food delivery application.</p>
+                        <div class="nudge-selector" role="group" aria-label="Meal selection options">
+                            <button class="nudge-choice-btn active" data-type="beef" aria-pressed="true"><i data-lucide="beef" aria-hidden="true"></i> Double Beef Burger</button>
+                            <button class="nudge-choice-btn" data-type="salad" aria-pressed="false"><i data-lucide="leaf" aria-hidden="true"></i> Grilled Tofu & Lentil Salad</button>
+                        </div>
+                        <div id="personalNudgeResult" class="nudge-alert warning" role="status" aria-live="polite">
+                            <i data-lucide="info" class="nudge-icon" aria-hidden="true"></i>
+                            <div class="nudge-content">
+                                <strong>Carbon Alert:</strong> Choosing the Beef Burger creates <strong>5.8 kg CO₂e</strong>, which is <strong>6.5x</strong> higher than the plant-based option. Swapping saves carbon equivalent to driving 24 km.
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- GREENSEC SIMULATOR (ENCRYPTION DEPLOYMENT) -->
+                    <article id="greensecNudgeBox" class="nudge-box hidden">
+                        <p class="nudge-intro-text">Interactive Sandbox: Simulate deploying security certificates to a high-traffic production server cluster.</p>
+                        <div class="nudge-selector" role="group" aria-label="Encryption standard deployment options">
+                            <button class="nudge-choice-btn active" data-type="rsa" aria-pressed="true"><i data-lucide="key" aria-hidden="true"></i> Deploy RSA-4096 Certificates</button>
+                            <button class="nudge-choice-btn" data-type="ecc" aria-pressed="false"><i data-lucide="key-round" aria-hidden="true"></i> Deploy ECC-256 Certificates</button>
+                        </div>
+                        <div id="greensecNudgeResult" class="nudge-alert info" role="status" aria-live="polite">
+                            <i data-lucide="terminal" class="nudge-icon" aria-hidden="true"></i>
+                            <div class="nudge-content">
+                                <strong>System Warning:</strong> Under high production load, RSA-4096 handshake validations will consume <strong>16x</strong> more CPU cycles than ECC-256, adding <strong>2.4 tons of CO₂e</strong> annually. ed25519 recommended.
+                            </div>
+                        </div>
+                    </article>
+                </section>
+
+                <!-- LEADERBOARD -->
+                <section class="card glass-card leaderboard-card" role="region" aria-label="Team Carbon Audit Leaderboard">
+                    <div class="card-header">
+                        <i data-lucide="trophy" class="header-icon" aria-hidden="true"></i>
+                        <h2>Team Carbon Audit Leaderboard</h2>
+                    </div>
+                    <div class="table-wrapper">
+                        <table class="styled-table" aria-label="Carbon efficiency scoreboard by corporate team">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Rank</th>
+                                    <th scope="col">Team</th>
+                                    <th scope="col">Carbon Score</th>
+                                    <th scope="col">Annual Savings</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leaderboardBody">
+                                <!-- Loaded dynamically via fetch -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </aside>
+
+        </main>
+
+        <!-- FOOTER & DEV CONSOLE BUTTON -->
+        <footer class="app-footer">
+            <p>&copy; 2026 EcoSphere Platform. Built securely for prompt excellence.</p>
+            <button class="dev-toggle-btn" id="devConsoleToggle" title="Open Developer Tests (Ctrl+Shift+D)" aria-haspopup="dialog" aria-expanded="false" aria-controls="devModal">
+                <i data-lucide="terminal" aria-hidden="true"></i> Dev Console
+            </button>
+        </footer>
+
+        <!-- CONCEALED DEV CONSOLE MODAL -->
+        <div class="dev-modal-overlay hidden" id="devModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+            <div class="dev-modal glass-card">
+                <div class="modal-header">
+                    <h3 id="modalTitle"><i data-lucide="terminal" aria-hidden="true"></i> Dev Mode Test Runner</h3>
+                    <button class="close-modal-btn" id="closeDevModal" aria-label="Close modal"><i data-lucide="x" aria-hidden="true"></i></button>
+                </div>
+                <div class="modal-body">
+                    <p class="modal-intro">Runs automated functional assertions, security validation audits, and mathematical engine checks in real time on the Python server.</p>
+                    <button class="btn btn-primary" id="runTestsBtn" aria-label="Execute all platform automated test assertions">Run Automated Test Suite</button>
+                    <div id="testProgress" class="test-progress hidden" aria-live="assertive">
+                        <div class="spinner" role="progressbar" aria-valuetext="Running backend test assertions"></div> Running backend test assertions...
+                    </div>
+                    <div id="testResults" class="test-results-container hidden" aria-live="polite">
+                        <div class="test-summary-card">
+                            <span>Status:</span> <span id="testSummaryStatus" class="badge">N/A</span>
+                        </div>
+                        <div class="test-list" id="testList">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Script -->
+    <script src="app.js"></script>
+</body>
+</html>
