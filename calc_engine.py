@@ -1,6 +1,7 @@
 import logging
 from typing import Dict, Any
 from functools import lru_cache
+import copy
 import config
 
 logger = logging.getLogger(__name__)
@@ -50,22 +51,24 @@ def calculate_personal_footprint(
 
     total = car_co2 + flight_co2 + diet_co2 + electricity_co2 + waste_co2
 
-    return {
-        "breakdown": {
-            "transportation": round(car_co2 + flight_co2, 1),
-            "diet": round(diet_co2, 1),
-            "energy": round(electricity_co2, 1),
-            "waste": round(waste_co2, 1),
-        },
-        "total_kg": round(total, 1),
-        "components": {
-            "car_co2": round(car_co2, 1),
-            "flight_co2": round(flight_co2, 1),
-            "diet_co2": round(diet_co2, 1),
-            "electricity_co2": round(electricity_co2, 1),
-            "waste_co2": round(waste_co2, 1),
-        },
-    }
+    return copy.deepcopy(
+        {
+            "breakdown": {
+                "transportation": round(car_co2 + flight_co2, 1),
+                "diet": round(diet_co2, 1),
+                "energy": round(electricity_co2, 1),
+                "waste": round(waste_co2, 1),
+            },
+            "total_kg": round(total, 1),
+            "components": {
+                "car_co2": round(car_co2, 1),
+                "flight_co2": round(flight_co2, 1),
+                "diet_co2": round(diet_co2, 1),
+                "electricity_co2": round(electricity_co2, 1),
+                "waste_co2": round(waste_co2, 1),
+            },
+        }
+    )
 
 
 def _calculate_crypto_co2(ops_millions: float, crypto_type: str) -> float:
@@ -152,22 +155,24 @@ def calculate_greensec_footprint(
     )
     potential_savings = max(0.0, total - optimized_total)
 
-    return {
-        "breakdown": {
-            "cryptography": round(crypto_co2, 1),
-            "log_storage": round(storage_co2, 1),
-            "vulnerability_scans": round(scan_co2, 1),
-            "host_agents": round(agent_co2, 1),
-        },
-        "total_kg": round(total, 1),
-        "potential_savings_kg": round(potential_savings, 1),
-        "components": {
-            "crypto_co2": round(crypto_co2, 1),
-            "storage_co2": round(storage_co2, 1),
-            "scan_co2": round(scan_co2, 1),
-            "agent_co2": round(agent_co2, 1),
-        },
-    }
+    return copy.deepcopy(
+        {
+            "breakdown": {
+                "cryptography": round(crypto_co2, 1),
+                "log_storage": round(storage_co2, 1),
+                "vulnerability_scans": round(scan_co2, 1),
+                "host_agents": round(agent_co2, 1),
+            },
+            "total_kg": round(total, 1),
+            "potential_savings_kg": round(potential_savings, 1),
+            "components": {
+                "crypto_co2": round(crypto_co2, 1),
+                "storage_co2": round(storage_co2, 1),
+                "scan_co2": round(scan_co2, 1),
+                "agent_co2": round(agent_co2, 1),
+            },
+        }
+    )
 
 
 @lru_cache(maxsize=128)
@@ -179,9 +184,11 @@ def get_relatable_equivalencies(co2_kg: float) -> Dict[str, Any]:
     flights = co2_kg / config.FLIGHT_EQUIVALENT_DIVISOR
     household_months = co2_kg / config.HOUSEHOLD_MONTH_DIVISOR
 
-    return {
-        "trees_planted": round(trees, 1),
-        "smartphone_charges": round(charges, 0),
-        "delhi_mumbai_flights": round(flights, 1),
-        "household_electricity_months": round(household_months, 1),
-    }
+    return copy.deepcopy(
+        {
+            "trees_planted": round(trees, 1),
+            "smartphone_charges": round(charges, 0),
+            "delhi_mumbai_flights": round(flights, 1),
+            "household_electricity_months": round(household_months, 1),
+        }
+    )
