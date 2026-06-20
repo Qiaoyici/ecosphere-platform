@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, Any
+from typing import Dict, Any, List
 from functools import lru_cache
 import copy
 import config
@@ -192,3 +192,197 @@ def get_relatable_equivalencies(co2_kg: float) -> Dict[str, Any]:
             "household_electricity_months": round(household_months, 1),
         }
     )
+
+
+def generate_personal_recommendations(
+    car_km_per_year: float,
+    flight_hours_per_year: float,
+    diet_type: str,
+    electricity_kwh_per_year: float,
+    waste_kg_per_year: float,
+    breakdown: Dict[str, float],
+) -> List[Dict[str, Any]]:
+    """Generates 3 ranked, personalized carbon reduction recommendations."""
+    if not breakdown:
+        return []
+
+    # Identify the SINGLE largest contributing category
+    largest_category = max(breakdown, key=breakdown.get)
+    recs = []
+
+    # 1. Diet Recommendation
+    diet_tiers = list(config.DIET_DAILY_FACTORS.keys())
+    if diet_type not in ["vegan", "vegetarian"] and diet_type in diet_tiers:
+        idx = diet_tiers.index(diet_type)
+        if idx < len(diet_tiers) - 1:
+            next_diet = diet_tiers[idx + 1]
+            current_factor = config.DIET_DAILY_FACTORS[diet_type]
+            next_factor = config.DIET_DAILY_FACTORS[next_diet]
+            savings = (current_factor - next_factor) * config.YEARLY_DAYS
+            if savings > 0:
+                action = (
+                    f"Transition your diet from {diet_type.replace('_', ' ')} "
+                    f"to {next_diet.replace('_', ' ')}"
+                )
+                difficulty = "challenging" if largest_category == "diet" else "easy"
+                recs.append({
+                    "action": action,
+                    "category": "diet",
+                    "estimated_savings_kg": round(savings, 1),
+                    "difficulty": difficulty
+                })
+
+    # 2. Car Recommendation
+    if car_km_per_year > 5000:
+        savings = 0.2 * car_km_per_year * config.CAR_EMISSION_FACTOR
+        difficulty = (
+            "challenging" if largest_category == "transportation" else "moderate"
+        )
+        recs.append({
+            "action": "Reduce car travel by 20% via carpooling or public transit",
+            "category": "transportation",
+            "estimated_savings_kg": round(savings, 1),
+            "difficulty": difficulty
+        })
+
+    # 3. Electricity Recommendation
+    if electricity_kwh_per_year > 1500:
+        savings = 0.15 * electricity_kwh_per_year * config.ELECTRICITY_EMISSION_FACTOR
+        difficulty = "challenging" if largest_category == "energy" else "easy"
+        recs.append({
+            "action": "Reduce home power use by 15% via efficient appliances and LEDs",
+            "category": "energy",
+            "estimated_savings_kg": round(savings, 1),
+            "difficulty": difficulty
+        })
+
+    # 4. Flight Recommendation
+    if flight_hours_per_year > 10:
+        savings = 4.0 * config.FLIGHT_EMISSION_FACTOR
+        difficulty = (
+            "challenging" if largest_category == "transportation" else "moderate"
+        )
+        recs.append({
+            "action": "Replace one round-trip flight with virtual meetings or rail travel",
+            "category": "transportation",
+            "estimated_savings_kg": round(savings, 1),
+            "difficulty": difficulty
+        })
+
+    # Sort descending by estimated savings and return top 3
+    recs.sort(key=lambda x: x["estimated_savings_kg"], reverse=True)
+    return recs[:3]
+
+
+def generate_greensec_recommendations(
+    crypto_ops_millions: float,
+    crypto_type: str,
+    log_size_gb: float,
+    log_storage_type: str,
+    scan_runs_per_month: float,
+    scan_type: str,
+    server_hours_per_month: float,
+    agent_type: str,
+    breakdown: Dict[str, float],
+) -> List[Dict[str, Any]]:
+    """Generates 3 ranked, personalized digital security recommendations."""
+    if not breakdown:
+        return []
+
+    largest_category = max(breakdown, key=breakdown.get)
+    recs = []
+
+    # 1. Cryptography Recommendation
+    if crypto_ops_millions > 0 and crypto_type != "ecc256":
+        current_factor = config.CRYPTO_KWH_PER_MILLION[crypto_type]
+        ecc_factor = config.CRYPTO_KWH_PER_MILLION["ecc256"]
+        savings = (
+            crypto_ops_millions
+            * (current_factor - ecc_factor)
+            * config.YEARLY_MONTHS
+            * config.GRID_CO2_FACTOR
+        )
+        if savings > 0:
+            difficulty = (
+                "challenging" if largest_category == "cryptography" else "moderate"
+            )
+            recs.append({
+                "action": "Upgrade cryptographic operations from RSA to ECC-256",
+                "category": "cryptography",
+                "estimated_savings_kg": round(savings, 1),
+                "difficulty": difficulty
+            })
+
+    # 2. Log Storage Recommendation
+    if log_size_gb > 0 and log_storage_type != "cold_archive":
+        current_factor = config.SIEM_STORAGE_CO2_PER_GB_MONTH[log_storage_type]
+        cold_factor = config.SIEM_STORAGE_CO2_PER_GB_MONTH["cold_archive"]
+        savings = log_size_gb * (current_factor - cold_factor) * config.YEARLY_MONTHS
+        if savings > 0:
+            difficulty = (
+                "challenging" if largest_category == "log_storage" else "easy"
+            )
+            recs.append({
+                "action": (
+                    "Migrate SIEM logging retention policy from hot storage "
+                    "to cold archive"
+                ),
+                "category": "log_storage",
+                "estimated_savings_kg": round(savings, 1),
+                "difficulty": difficulty
+            })
+
+    # 3. Vulnerability Scans Recommendation
+    if scan_runs_per_month > 0 and scan_type != "targeted_sast":
+        current_factor = config.SCAN_KWH_PER_RUN[scan_type]
+        sast_factor = config.SCAN_KWH_PER_RUN["targeted_sast"]
+        savings = (
+            scan_runs_per_month
+            * (current_factor - sast_factor)
+            * config.YEARLY_MONTHS
+            * config.GRID_CO2_FACTOR
+        )
+        if savings > 0:
+            difficulty = (
+                "challenging"
+                if largest_category == "vulnerability_scans"
+                else "easy"
+            )
+            recs.append({
+                "action": (
+                    "Optimize vulnerability scanning by replacing full DAST "
+                    "runs with targeted SAST"
+                ),
+                "category": "vulnerability_scans",
+                "estimated_savings_kg": round(savings, 1),
+                "difficulty": difficulty
+            })
+
+    # 4. VM Agent Recommendation
+    if server_hours_per_month > 0 and agent_type != "light_kernel":
+        current_factor = config.AGENT_KWH_PER_HOUR[agent_type]
+        kernel_factor = config.AGENT_KWH_PER_HOUR["light_kernel"]
+        savings = (
+            server_hours_per_month
+            * (current_factor - kernel_factor)
+            * config.YEARLY_MONTHS
+            * config.GRID_CO2_FACTOR
+        )
+        if savings > 0:
+            difficulty = (
+                "challenging" if largest_category == "host_agents" else "moderate"
+            )
+            recs.append({
+                "action": (
+                    "Deploy lightweight eBPF kernel host sensors instead "
+                    "of heavy userspace agents"
+                ),
+                "category": "host_agents",
+                "estimated_savings_kg": round(savings, 1),
+                "difficulty": difficulty
+            })
+
+    # Sort descending by estimated savings and return top 3
+    recs.sort(key=lambda x: x["estimated_savings_kg"], reverse=True)
+    return recs[:3]
+

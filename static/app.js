@@ -321,7 +321,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         
         updateSphereStatusText(data.emissions.total_kg);
-
+ 
         if (treesVal) {
             treesVal.innerText = data.equivalency.trees_planted.toLocaleString(undefined, {
                 maximumFractionDigits: 1
@@ -341,6 +341,35 @@ document.addEventListener("DOMContentLoaded", () => {
             electricityVal.innerText = data.equivalency.household_electricity_months.toLocaleString(undefined, {
                 maximumFractionDigits: 1
             });
+        }
+
+        // Render carbon reduction recommendations
+        const recSection = document.getElementById("recommendationsSection");
+        const recList = document.getElementById("recommendationsList");
+        if (recSection && recList) {
+            if (data.recommendations && data.recommendations.length > 0) {
+                recList.innerHTML = "";
+                data.recommendations.forEach(rec => {
+                    const card = document.createElement("div");
+                    card.className = "recommendation-card";
+                    
+                    const badgeClass = `badge-${rec.difficulty}`;
+                    const diffText = rec.difficulty.toUpperCase();
+                    
+                    card.innerHTML = `
+                        <div class="rec-info">
+                            <p class="rec-action">${rec.action}</p>
+                            <span class="rec-savings">Save ~${rec.estimated_savings_kg.toLocaleString()} kg CO₂/year</span>
+                        </div>
+                        <span class="badge ${badgeClass}">${diffText}</span>
+                    `;
+                    recList.appendChild(card);
+                });
+                recSection.classList.remove("hidden");
+                lucide.createIcons();
+            } else {
+                recSection.classList.add("hidden");
+            }
         }
     }
 

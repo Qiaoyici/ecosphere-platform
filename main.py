@@ -199,6 +199,9 @@ async def calculate_personal(req: PersonalCalcRequest) -> Dict[str, Any]:
         car_km, flights, diet, electricity, waste
     )
     equivalency = calc_engine.get_relatable_equivalencies(emissions["total_kg"])
+    recommendations = calc_engine.generate_personal_recommendations(
+        car_km, flights, diet, electricity, waste, emissions["breakdown"]
+    )
     
     logger.info(
         f"calculate_personal endpoint success: total_kg={emissions['total_kg']}"
@@ -207,7 +210,8 @@ async def calculate_personal(req: PersonalCalcRequest) -> Dict[str, Any]:
         "status": "success",
         "data": {
             "emissions": emissions,
-            "equivalency": equivalency
+            "equivalency": equivalency,
+            "recommendations": recommendations
         }
     }
 
@@ -260,6 +264,17 @@ async def calculate_greensec(req: GreenSecCalcRequest) -> Dict[str, Any]:
         agent_type
     )
     equivalency = calc_engine.get_relatable_equivalencies(emissions["total_kg"])
+    recommendations = calc_engine.generate_greensec_recommendations(
+        crypto_ops,
+        crypto_type,
+        log_size,
+        log_storage,
+        scan_runs,
+        scan_type,
+        server_hours,
+        agent_type,
+        emissions["breakdown"]
+    )
     
     logger.info(
         f"calculate_greensec endpoint success: total_kg={emissions['total_kg']}"
@@ -268,7 +283,8 @@ async def calculate_greensec(req: GreenSecCalcRequest) -> Dict[str, Any]:
         "status": "success",
         "data": {
             "emissions": emissions,
-            "equivalency": equivalency
+            "equivalency": equivalency,
+            "recommendations": recommendations
         }
     }
 
@@ -527,10 +543,83 @@ def _test_overflow_prevention() -> Dict[str, Any]:
         }
 
 
+def _test_personal_recommendations() -> Dict[str, Any]:
+    try:
+        breakdown = {
+            "transportation": 1800.0,
+            "diet": 2629.8,
+            "energy": 1640.0,
+            "waste": 0.0
+        }
+        recs = calc_engine.generate_personal_recommendations(
+            car_km_per_year=10000.0,
+            flight_hours_per_year=0.0,
+            diet_type="beef_heavy",
+            electricity_kwh_per_year=2000.0,
+            waste_kg_per_year=0.0,
+            breakdown=breakdown
+        )
+        assert len(recs) == 3
+        assert recs[0]["category"] == "diet"
+        assert recs[1]["category"] == "transportation"
+        assert recs[2]["category"] == "energy"
+        assert recs[0]["estimated_savings_kg"] == 1424.5
+        assert recs[1]["estimated_savings_kg"] == 360.0
+        assert recs[2]["estimated_savings_kg"] == 246.0
+        return {
+            "name": "Personal Recommendations Engine Logic",
+            "passed": True,
+            "details": "Correctly sorted and calculated 3 lifestyle suggestions."
+        }
+    except Exception as e:
+        return {
+            "name": "Personal Recommendations Engine Logic",
+            "passed": False,
+            "details": str(e)
+        }
+
+
+def _test_greensec_recommendations() -> Dict[str, Any]:
+    try:
+        breakdown = {
+            "cryptography": 96.0,
+            "log_storage": 90.0,
+            "vulnerability_scans": 0.0,
+            "host_agents": 0.0
+        }
+        recs = calc_engine.generate_greensec_recommendations(
+            crypto_ops_millions=100.0,
+            crypto_type="rsa4096",
+            log_size_gb=500.0,
+            log_storage_type="hot_storage",
+            scan_runs_per_month=0.0,
+            scan_type="targeted_sast",
+            server_hours_per_month=0.0,
+            agent_type="light_kernel",
+            breakdown=breakdown
+        )
+        assert len(recs) == 2
+        assert recs[0]["category"] == "log_storage"
+        assert recs[1]["category"] == "cryptography"
+        assert recs[0]["estimated_savings_kg"] == 78.0
+        assert recs[1]["estimated_savings_kg"] == 73.8
+        return {
+            "name": "GreenSec Recommendations Engine Logic",
+            "passed": True,
+            "details": "Correctly sorted and calculated 2 IT security suggestions."
+        }
+    except Exception as e:
+        return {
+            "name": "GreenSec Recommendations Engine Logic",
+            "passed": False,
+            "details": str(e)
+        }
+
+
 @app.get("/api/tests")
 async def execute_test_suite() -> Dict[str, Any]:
     """Triggers backend functional and validation checks for the Dev panel.
-
+ 
     Runs comprehensive regression tests for calculation math, validation
     boundaries, input sanitization, and cryptographic state signing to ensure the
     platform behaves reliably for audits.
@@ -542,7 +631,9 @@ async def execute_test_suite() -> Dict[str, Any]:
         _test_personal_calc_math(),
         _test_greensec_crypto_comparison(),
         _test_negative_clamping(),
-        _test_overflow_prevention()
+        _test_overflow_prevention(),
+        _test_personal_recommendations(),
+        _test_greensec_recommendations()
     ]
     overall = "PASSED" if all(t["passed"] for t in test_results) else "FAILED"
     return {
