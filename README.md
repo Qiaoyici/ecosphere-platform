@@ -47,6 +47,7 @@ Results are translated into relatable equivalencies:
 - Equivalent Delhi–Mumbai flights
 - Smartphone charges
 - Household electricity months
+- **Actionable Recommendations**: Dynamic generation of 3 ranked, personalized footprint-reduction suggestions with exact calculated carbon savings and HSL-styled difficulty badges (`EASY`, `MODERATE`, `CHALLENGING`) customized to the user's highest emission categories.
 
 ### State Integrity
 User session state is HMAC-SHA256 signed and Base64 encoded via `/api/state/sign` and `/api/state/verify`, enabling tamper detection without a database.
@@ -58,7 +59,7 @@ User session state is HMAC-SHA256 signed and Base64 encoded via `/api/state/sign
 1. User opens the web UI and selects either **Personal** or **GreenSec** mode
 2. They fill in their lifestyle or IT infrastructure parameters
 3. The frontend POSTs to the relevant `/api/calculate/` endpoint
-4. The backend calculates emissions per category, totals them, and returns a breakdown with equivalencies
+4. The backend calculates emissions per category, totals them, and returns a breakdown with equivalencies and personalized recommendations
 5. The leaderboard (`/api/leaderboard`) shows team-level rankings to encourage healthy competition
 6. The dev panel (`/api/tests`) runs a built-in functional test suite to validate core logic
 
@@ -112,5 +113,6 @@ uvicorn main:app --reload --port 8000
 | **Code Quality** | Separated concerns across 3 modules; typed with Pydantic v2; full docstrings |
 | **Security** | HMAC-SHA256 state signing; XSS sanitisation; input clamping; no hardcoded secrets |
 | **Efficiency** | `lru_cache` on pure calculation functions; GZip middleware; async endpoints |
-| **Testing** | `/api/tests` endpoint validates 7 functional cases including edge cases and tamper detection |
+| **Testing** | `/api/tests` endpoint validates 9 functional cases including edge cases, tamper detection, and recommendation engine logic |
 | **Accessibility** | Static frontend served directly; no login required; works on mobile browsers |
+
