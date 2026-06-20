@@ -1,5 +1,6 @@
 import os
 import logging
+import json
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
@@ -7,7 +8,7 @@ from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import List, Dict, Any, Literal
 import config
 import calc_engine
@@ -145,7 +146,16 @@ class GreenSecCalcRequest(BaseModel):
 
 
 class StateSignRequest(BaseModel):
-    state: Dict[str, Any] = Field(..., description="Client-side JSON state object")
+    state: Dict[str, Any] = Field(
+        ..., description="Client-side JSON state object to secure"
+    )
+
+    @field_validator("state")
+    @classmethod
+    def state_size_limit(cls, v: Dict[str, Any]) -> Dict[str, Any]:
+        if len(json.dumps(v)) > 10_000:
+            raise ValueError("State payload exceeds 10KB limit.")
+        return v
 
 
 class StateVerifyRequest(BaseModel):
