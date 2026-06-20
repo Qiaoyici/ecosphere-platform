@@ -59,9 +59,10 @@ User session state is HMAC-SHA256 signed and Base64 encoded via `/api/state/sign
 1. User opens the web UI and selects either **Personal** or **GreenSec** mode
 2. They fill in their lifestyle or IT infrastructure parameters
 3. The frontend POSTs to the relevant `/api/calculate/` endpoint
-4. The backend calculates emissions per category, totals them, and returns a breakdown with equivalencies and personalized recommendations
-5. The leaderboard (`/api/leaderboard`) shows team-level rankings to encourage healthy competition
-6. The dev panel (`/api/tests`) runs a built-in functional test suite to validate core logic
+4. The backend calculates emissions per category, totals them, and returns a category breakdown with relatable equivalencies
+5. The backend also generates 3 ranked, personalized footprint-reduction recommendations based on the user's highest-emission categories, each with calculated CO2 savings and a difficulty rating
+6. The leaderboard (`/api/leaderboard`) shows team-level rankings to encourage healthy competition
+7. The dev panel (`/api/tests`) runs a built-in functional test suite to validate core logic
 
 ## Running Locally
 
@@ -115,4 +116,10 @@ uvicorn main:app --reload --port 8000
 | **Efficiency** | `lru_cache` on pure calculation functions; GZip middleware; async endpoints |
 | **Testing** | `/api/tests` endpoint validates 9 functional cases including edge cases, tamper detection, and recommendation engine logic |
 | **Accessibility** | Static frontend served directly; no login required; works on mobile browsers |
+
+---
+
+## Verification Evidence
+
+Comprehensive implementation plans, task tracking lists, visual snapshots, and walkthrough recordings demonstrating the application's layout and test status are preserved in the [docs/](docs/) folder.
 
